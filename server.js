@@ -26,7 +26,13 @@ app.post("/send-absent-sms", async (req, res) => {
             // ✅ CLEAN NUMBER (IMPORTANT)
             const phone = String(s.phone).replace(/\D/g, "").slice(-10);
 
-            const message = `Dear Parent, your ward ${s.name} (Class ${className}) was ABSENT on ${date}. - ${schoolName}`;
+           const message = `Dear Parent,
+
+This is to inform you that your ward ${s.name} (Class ${className}) was marked ABSENT on ${date}.
+
+Kindly ensure regular attendance.
+
+– ${schoolName}`;
 
             const data = qs.stringify({
                 route: "q",
@@ -60,4 +66,6 @@ console.log("FAST2SMS RESPONSE:", response.data);
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on " + PORT));
+app.listen(PORT, () => console.log("Server running on " + PORT));app.get("/", (req, res) => {
+    res.send("Backend running 🚀");
+});
