@@ -26,7 +26,7 @@ app.post("/send-absent-sms", async (req, res) => {
             // ✅ CLEAN NUMBER (IMPORTANT)
             const phone = String(s.phone).replace(/\D/g, "").slice(-10);
 
-           const message = `Dear Parent, your ward ${s.name} (Class ${className}) was marked ABSENT on ${date}. Kindly ensure regular attendance. - ${schoolName}`;
+            const message = `Dear Parent, your ward ${s.name} (Class ${className}) was ABSENT on ${date}. - ${schoolName}`;
 
             const data = qs.stringify({
                 route: "q",
@@ -53,7 +53,8 @@ console.log("FAST2SMS RESPONSE:", response.data);
         res.json({ success: true });
 
     } catch (err) {
-        console.error("Failed for:", s.phone, err.response?.data || err.message);
+        console.error("ERROR:", err.response?.data || err.message);
+        res.status(500).json({ error: "SMS failed" });
     }
 
 });
