@@ -1,12 +1,13 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const qs = require("qs"); // 👈 IMPORTANT
 
 const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: "https://smartattendx.com"
+  origin: "*"
 }));
 
 const API_KEY = "g2FN7oJ5M4hVxljAnaR0Q9kcTqYPzCGWu81tOfE3Hew6BIiKbvktERUvQ8qzlY1fgGmSebKohxuXN0wV";
@@ -18,44 +19,45 @@ app.post("/send-absent-sms", async (req, res) => {
 
     try {
 
-        for(const s of students){
+        for (const s of students) {
 
-            if(!s.phone) continue;
+            if (!s.phone) continue;
 
-            const message = `Dear Parent,
+            // ✅ CLEAN NUMBER (IMPORTANT)
+            const phone = String(s.phone).replace(/\D/g, "").slice(-10);
 
-This is to inform you that your ward ${s.name} (Class ${className}) was marked ABSENT on ${date}.
+            const message = `Dear Parent, your ward ${s.name} (Class ${className}) was ABSENT on ${date}. - ${schoolName}`;
 
-Kindly ensure regular attendance.
-
-– ${schoolName}`;
-
-            await axios.post("https://www.fast2sms.com/dev/bulkV2", {
-                route: "v3",
-                sender_id: "TXTIND",
+            const data = qs.stringify({
+                route: "q",
                 message: message,
                 language: "english",
-                numbers: s.phone
-            },{
-                headers: {
-                    authorization: API_KEY
-                }
+                flash: 0,
+                numbers: phone
             });
 
+           const response = await axios.post(
+    "https://www.fast2sms.com/dev/bulkV2",
+    data,
+    {
+        headers: {
+            authorization: API_KEY,
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+    }
+);
+
+console.log("FAST2SMS RESPONSE:", response.data);
         }
 
         res.json({ success: true });
 
     } catch (err) {
-        console.error(err.response?.data || err.message);
+        console.error("ERROR:", err.response?.data || err.message);
         res.status(500).json({ error: "SMS failed" });
     }
 
 });
 
-/* PORT FIX FOR RENDER */
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
-});
+app.listen(PORT, () => console.log("Server running on " + PORT));
